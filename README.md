@@ -2,7 +2,7 @@
 title: TSViT Crop Classification
 emoji: 🌾
 colorFrom: green
-colorTo: emerald
+colorTo: blue
 sdk: gradio
 app_file: app.py
 pinned: false
