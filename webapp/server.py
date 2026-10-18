@@ -165,6 +165,18 @@ def calculate_polygon_area_ha(geometry):
         return 24.49
 
 
+try:
+    import spaces
+    @spaces.GPU
+    def run_model_forward(model, dummy_input):
+        with torch.no_grad():
+            return model(dummy_input)
+except Exception:
+    def run_model_forward(model, dummy_input):
+        with torch.no_grad():
+            return model(dummy_input)
+
+
 def run_model_inference_on_area(job_id, geometry, season, patch_id):
     """Executes TSViT model inference and generates crop classification raster overlay."""
     job = ANALYSIS_JOBS[job_id]
@@ -180,17 +192,16 @@ def run_model_inference_on_area(job_id, geometry, season, patch_id):
 
     # Progress step 2: TSViT inference
     job["phase"] = "inference"
-    job["message"] = "TSViT crop classification (CUDA)"
+    job["message"] = "TSViT crop classification"
     
     # Run PyTorch forward pass on sample time-series window
     model = load_tsvit_model()
     if model is not None:
         try:
-            with torch.no_grad():
-                # 1 batch, 12 time-steps, 24x24 resolution, 11 channels
-                dummy_input = torch.randn(1, 12, 24, 24, 11, device=DEVICE)
-                dummy_input[:, :, :, :, -1] = torch.linspace(0.1, 0.9, 12, device=DEVICE).view(1, 12, 1, 1)
-                _ = model(dummy_input)
+            # 1 batch, 12 time-steps, 24x24 resolution, 11 channels
+            dummy_input = torch.randn(1, 12, 24, 24, 11, device=DEVICE)
+            dummy_input[:, :, :, :, -1] = torch.linspace(0.1, 0.9, 12, device=DEVICE).view(1, 12, 1, 1)
+            _ = run_model_forward(model, dummy_input)
         except Exception as e:
             print(f"Model forward error: {e}")
 

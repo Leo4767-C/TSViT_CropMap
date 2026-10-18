@@ -11,6 +11,15 @@ import sys
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, ROOT_DIR)
 
+try:
+    import spaces
+    @spaces.GPU
+    def spaces_gpu_worker():
+        return True
+    print("Registered ZeroGPU worker hook successfully.")
+except Exception as e:
+    print(f"Running without ZeroGPU hook: {e}")
+
 from webapp.server import run
 
 if __name__ == '__main__':
@@ -18,3 +27,4 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 7860))
     print(f"Starting TSViT Crop Map on port {port}...")
     run(port=port)
+
