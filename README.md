@@ -1,3 +1,13 @@
+---
+title: TSViT Crop Classification
+emoji: 🌾
+colorFrom: green
+colorTo: emerald
+sdk: gradio
+app_file: app.py
+pinned: false
+---
+
 # BÁO CÁO CẬP NHẬT: THAY THẾ SPATIAL ENCODER / BACKBONE CỦA TSViT BẰNG DINO-v3
 
 Tài liệu này chỉ rõ từng vị trí code đã được cập nhật khi thay thế **Spatial Encoder / Backbone** của mô hình **TSViT** bằng kiến trúc **Meta DINO-v3**.

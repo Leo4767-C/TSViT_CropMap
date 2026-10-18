@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+.env
+.DS_Store
+webapp/assets/overlay_*.png
+webapp/assets/test_*.png
+webapp/assets/match_*.png

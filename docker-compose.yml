@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  tsvit-cropmap:
+    build: .
+    container_name: tsvit-cropmap
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      - PYTHONUNBUFFERED=1

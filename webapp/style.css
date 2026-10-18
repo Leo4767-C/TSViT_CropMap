@@ -1,0 +1,675 @@
+/* ========================================================
+   TSViT Crop Classification Theme Stylesheet
+   Combines full crop.loanhviet.dev tool suite with TSViT aesthetics
+   ======================================================== */
+
+:root {
+  --green: #1b5e43;
+  --green-hover: #144933;
+  --text: #111827;
+  --text-muted: #64748b;
+  --text-body: #1e293b;
+  --border: #d5e0e7;
+  --border-card: #cbd5e1;
+  --surface: #f8fafc;
+  
+  --font-serif: 'Merriweather', 'PT Serif', Georgia, serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Crop color palette */
+  --crop-wheat: #f6d058;
+  --crop-maize: #7cc387;
+  --crop-sunflower: #f1ad70;
+  --crop-barley: #6daee2;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #f1f5f9;
+  color: var(--text-body);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, select {
+  font: inherit;
+}
+
+button, select, input[type=checkbox], input[type=range] {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+button:focus-visible, select:focus-visible, a:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* ========================================================
+   HEADER (TSViT Style)
+   ======================================================== */
+.header {
+  height: 52px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--border-card);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  flex-shrink: 0;
+  z-index: 100;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-title {
+  font-family: var(--font-serif);
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--text);
+}
+
+/* ========================================================
+   WORKSPACE (Map & Sidebar)
+   ======================================================== */
+.workspace {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - 52px);
+  min-height: 0;
+  position: relative;
+}
+
+/* Sidebar on the right */
+.sidebar {
+  width: 340px;
+  flex-shrink: 0;
+  background: #ffffff;
+  border-left: 1px solid var(--border-card);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 22px;
+  gap: 16px;
+  overflow-y: auto;
+  z-index: 50;
+}
+
+.workspace.collapsed .sidebar {
+  display: none;
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sidebar-title {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.2px;
+}
+
+.icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  background: var(--surface);
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.small {
+  font-size: 13px;
+}
+
+.subtitle {
+  font-size: 14px;
+}
+
+.imagery {
+  font-size: 14px;
+  margin-top: -4px;
+}
+
+/* Control Fields: Selected Area & Season */
+.fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 7px 12px;
+  border: 1px solid var(--border-card);
+  border-radius: 3px;
+  font-weight: 600;
+  font-size: 13.5px;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.neutral {
+  background: #ffffff;
+  color: var(--text-body);
+}
+
+.neutral:hover {
+  background: var(--surface);
+  border-color: #94a3b8;
+}
+
+.primary {
+  background: var(--green);
+  border-color: var(--green);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.primary:hover {
+  background: var(--green-hover);
+}
+
+.primary:disabled {
+  background: #a7cfbe;
+  border-color: #a7cfbe;
+  color: #ffffff;
+}
+
+.sidebar > .button {
+  width: 100%;
+}
+
+.select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+select {
+  width: 100%;
+  height: 38px;
+  border: 1px solid var(--border-card);
+  border-radius: 3px;
+  background: #ffffff;
+  padding: 6px 22px 6px 9px;
+  color: var(--text-body);
+  font-size: 13.5px;
+  font-weight: 500;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.select-arrow {
+  position: absolute;
+  right: 8px;
+  font-size: 8px;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid var(--border-card);
+  margin: 0;
+}
+
+/* Status Indicator */
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--green);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+/* Empty, Ready, Running States */
+.notice {
+  padding: 14px;
+  border-radius: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border-card);
+  font-size: 14px;
+}
+
+.notice p {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.how-title, .running-title {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.how-steps {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+
+.how-steps li {
+  margin-bottom: 5px;
+}
+
+progress {
+  width: 100%;
+  height: 6px;
+  border: 0;
+  border-radius: 3px;
+  accent-color: var(--green);
+}
+
+progress::-webkit-progress-bar {
+  background: #e2e8f0;
+  border-radius: 3px;
+}
+
+progress::-webkit-progress-value {
+  background: var(--green);
+  border-radius: 3px;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.btn-cancel {
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+/* Results State */
+.section-title {
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.crop-table-container {
+  border: 1px solid var(--border-card);
+  border-radius: 2px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.crop-table {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.crop-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 32px;
+  width: 100%;
+  padding: 5px 10px;
+  background: #ffffff;
+  border: none;
+  border-bottom: 1px solid var(--border-card);
+  text-align: left;
+  font-size: 13.5px;
+  color: var(--text-body);
+  transition: background 0.15s;
+}
+
+.crop-row:last-child {
+  border-bottom: none;
+}
+
+.crop-row:hover {
+  background: #f0fdf4;
+}
+
+.swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.crop-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 500;
+}
+
+.crop-area {
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 0;
+}
+
+.total-label, .total-val {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.btn-download {
+  margin-top: 6px;
+}
+
+.download-arrow {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* ========================================================
+   MAP PANE (Live Satellite Leaflet Map)
+   ======================================================== */
+.map-pane {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #e3eae0;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+  background: #dbe4da;
+  z-index: 1;
+}
+
+.map-left {
+  position: absolute;
+  top: 16px;
+  left: 20px;
+  display: flex;
+  gap: 8px;
+  z-index: 500;
+}
+
+.map-card, .map-button {
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 3px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border-card);
+}
+
+.map-left .button {
+  font-size: 13.5px;
+  padding: 6px 14px;
+  height: 36px;
+}
+
+.workspace.drawing #select-map {
+  background: var(--green);
+  border-color: var(--green);
+  color: #ffffff;
+}
+
+.map-right-controls {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  z-index: 500;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.expand {
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.expand img {
+  transform: rotate(0deg);
+}
+
+.collapse img {
+  transform: rotate(180deg);
+}
+
+.classification-switch {
+  position: static;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 13.5px;
+  font-weight: 500;
+  height: 36px;
+}
+
+.classification-switch input {
+  accent-color: var(--green);
+  width: 15px;
+  height: 15px;
+  margin: 0;
+}
+
+.map-controls {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid var(--border-card);
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.map-controls button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  padding: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.map-controls button:hover {
+  background: var(--surface);
+}
+
+.map-message {
+  position: absolute;
+  top: 70px;
+  left: 20px;
+  padding: 10px 14px;
+  z-index: 500;
+  font-size: 13.5px;
+  font-weight: 500;
+  max-width: calc(100% - 90px);
+  pointer-events: none;
+}
+
+/* Leaflet Selection Label Matching Screenshot */
+.selection-label {
+  font-family: var(--font-sans) !important;
+  font-weight: 600 !important;
+  font-size: 15px !important;
+  color: #1e293b !important;
+  background: #ffffff !important;
+  border: none !important;
+  border-radius: 4px !important;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.25) !important;
+  padding: 6px 14px !important;
+}
+
+.selection-label::before {
+  display: none !important;
+}
+
+/* Corner handles on rectangle */
+.rect-handle {
+  width: 8px !important;
+  height: 8px !important;
+  background: #ffffff !important;
+  border: 1.2px solid #1e293b !important;
+  border-radius: 1px !important;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+.rect-handle:hover {
+  background: #f8fafc !important;
+  border-color: #0284c7 !important;
+  transform: scale(1.2);
+}
+
+.workspace.drawing #map {
+  cursor: crosshair;
+}
+
+/* Modal Dialogs */
+dialog {
+  width: 480px;
+  max-width: calc(100% - 32px);
+  padding: 22px 24px;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+  color: var(--text-body);
+  font-size: 15px;
+}
+
+dialog::backdrop {
+  background: rgba(15, 23, 42, 0.45);
+}
+
+dialog[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+dialog h2 {
+  font-family: var(--font-serif);
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.dialog-actions .button {
+  min-width: 100px;
+}
+
+.checkbox-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 14px;
+}
+
+.checkbox-row input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--green);
+}
+
+.export-label {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 18px;
+  background: #0f172a;
+  color: #ffffff;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 2000;
+}
