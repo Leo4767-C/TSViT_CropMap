@@ -222,6 +222,7 @@ async function computeClientResult(jobId, geometry) {
 async function clientApi(url, options = {}) {
   if (url.includes('/api/catalog')) {
     return {
+      seasons: ["2018–2019"],
       patches: [{
         id: 900010,
         name: "Normandy · 23.04 × 23.04 km",
@@ -260,9 +261,25 @@ async function clientApi(url, options = {}) {
   }
 
   if (url.includes('/api/imagery-plan')) {
+    let area_ha = 24.49;
+    if (state.geometry) {
+      try {
+        const coords = state.geometry.coordinates[0];
+        const lngs = coords.map(pt => pt[0]);
+        const lats = coords.map(pt => pt[1]);
+        const south = Math.min(...lats), north = Math.max(...lats);
+        const west = Math.min(...lngs), east = Math.max(...lngs);
+        const lat_mid = (north + south) / 2.0;
+        const lat_m = Math.max(10.0, (north - south) * 111320.0);
+        const lng_m = Math.max(10.0, (east - west) * 111320.0 * Math.cos(lat_mid * Math.PI / 180.0));
+        area_ha = Math.max(0.01, (lat_m * lng_m) / 10000.0);
+      } catch {}
+    }
     return {
       patch_id: 900010,
       season: "2018–2019",
+      selected_area_ha: Math.round(area_ha * 100) / 100,
+      observations: 36,
       acquisitions: 36,
       time_steps: 12,
       resolution_m: 10,
