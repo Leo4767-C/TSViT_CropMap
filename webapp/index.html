@@ -10,18 +10,18 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@700;900&display=swap" rel="stylesheet">
   
-  <link rel="icon" href="/assets/map.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/assets/leaflet.css">
-  <link rel="stylesheet" href="/style.css">
-  <script defer src="/assets/leaflet.js"></script>
-  <script defer src="/app.js"></script>
+  <link rel="icon" href="assets/map.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="assets/leaflet.js"></script>
+  <script defer src="app.js"></script>
 </head>
 <body>
 
   <!-- Top Header with TSViT Branding -->
   <header class="header">
     <div class="header-left">
-      <img class="desktop-mark" src="/assets/map.svg" alt="" width="32" height="32">
+      <img class="desktop-mark" src="assets/map.svg" alt="" width="32" height="32">
       <h1 class="logo-title">TSVIT</h1>
     </div>
   </header>
@@ -55,16 +55,16 @@
       <div class="map-right-controls">
         <div class="map-controls">
           <button class="map-button" id="zoom-in" aria-label="Zoom in" title="Zoom in">
-            <img src="/assets/plus.svg" alt="+" width="20" height="20">
+            <img src="assets/plus.svg" alt="+" width="20" height="20">
           </button>
           <button class="map-button" id="zoom-out" aria-label="Zoom out" title="Zoom out">
-            <img src="/assets/minus.svg" alt="−" width="20" height="20">
+            <img src="assets/minus.svg" alt="−" width="20" height="20">
           </button>
           <button class="map-button" id="home" aria-label="Return to selected area" title="Return to selected area">
-            <img src="/assets/home.svg" alt="Home" width="20" height="20">
+            <img src="assets/home.svg" alt="Home" width="20" height="20">
           </button>
           <button class="map-button expand" id="expand" aria-label="Expand analysis panel" title="Expand panel" hidden>
-            <img src="/assets/collapse.svg" alt="" width="20" height="20">
+            <img src="assets/collapse.svg" alt="" width="20" height="20">
           </button>
         </div>
       </div>
@@ -81,7 +81,7 @@
       <div class="heading">
         <h2 class="sidebar-title">Crop Classification</h2>
         <button class="icon-button collapse" id="collapse" aria-label="Collapse panel" title="Collapse sidebar">
-          <img src="/assets/collapse.svg" alt="" width="20" height="20">
+          <img src="assets/collapse.svg" alt="" width="20" height="20">
         </button>
       </div>
 
@@ -184,7 +184,7 @@
   <dialog id="confirm-dialog">
     <div class="heading">
       <h2>Reselect area?</h2>
-      <button class="icon-button dialog-close" aria-label="Close"><img src="/assets/close.svg" width="22" height="22" alt=""></button>
+      <button class="icon-button dialog-close" aria-label="Close"><img src="assets/close.svg" width="22" height="22" alt=""></button>
     </div>
     <p class="muted">Your current result will leave the map. Download it first if you need a copy.</p>
     <div class="dialog-actions">
@@ -197,7 +197,7 @@
   <dialog id="export-dialog">
     <div class="heading">
       <h2>Download results</h2>
-      <button class="icon-button dialog-close" aria-label="Close"><img src="/assets/close.svg" width="22" height="22" alt=""></button>
+      <button class="icon-button dialog-close" aria-label="Close"><img src="assets/close.svg" width="22" height="22" alt=""></button>
     </div>
     <p class="muted" id="export-description"></p><hr class="divider">
     <label class="export-label" for="export-format">File format</label>
@@ -223,7 +223,7 @@
   <dialog id="download-dialog">
     <div class="heading">
       <h2>Download ready</h2>
-      <button class="icon-button dialog-close" aria-label="Close"><img src="/assets/close.svg" width="22" height="22" alt=""></button>
+      <button class="icon-button dialog-close" aria-label="Close"><img src="assets/close.svg" width="22" height="22" alt=""></button>
     </div>
     <p class="muted">Your download has completed. It contains the predictions from this analysis.</p>
     <button class="button primary dialog-close">Back to map</button>

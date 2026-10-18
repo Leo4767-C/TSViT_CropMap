@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>TSVIT - Crop Classification</title>
+  
+  <!-- Fonts matching TSViT design -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@700;900&display=swap" rel="stylesheet">
+  
+  <link rel="icon" href="assets/map.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="assets/leaflet.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+
+  <!-- Top Header with TSViT Branding -->
+  <header class="header">
+    <div class="header-left">
+      <img class="desktop-mark" src="assets/map.svg" alt="" width="32" height="32">
+      <h1 class="logo-title">TSVIT</h1>
+    </div>
+  </header>
+
+  <!-- Main Workspace (Map on Left, Analysis Panel on Right) -->
+  <main class="workspace" id="workspace">
+    
+    <!-- Map Pane (Live Satellite Leaflet Map on Left) -->
+    <section class="map-pane" aria-label="Satellite map">
+      
+      <!-- Leaflet Container -->
+      <div id="map"></div>
+
+      <!-- Top Left Tools: Select Area, Whole Region, Cancel -->
+      <div class="map-left">
+        <button id="select-map" class="button neutral map-button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="1.5" />
+            <line x1="3" y1="8" x2="8" y2="3" />
+            <line x1="3" y1="14" x2="14" y2="3" />
+            <line x1="3" y1="20" x2="20" y2="3" />
+            <line x1="9" y1="21" x2="21" y2="9" />
+            <line x1="15" y1="21" x2="21" y2="15" />
+          </svg>
+          <span>Select area</span>
+        </button>
+        <button id="draw-cancel" class="button neutral map-button" hidden>Cancel</button>
+      </div>
+
+      <!-- Top Right Controls -->
+      <div class="map-right-controls">
+        <div class="map-controls">
+          <button class="map-button" id="zoom-in" aria-label="Zoom in" title="Zoom in">
+            <img src="assets/plus.svg" alt="+" width="20" height="20">
+          </button>
+          <button class="map-button" id="zoom-out" aria-label="Zoom out" title="Zoom out">
+            <img src="assets/minus.svg" alt="−" width="20" height="20">
+          </button>
+          <button class="map-button" id="home" aria-label="Return to selected area" title="Return to selected area">
+            <img src="assets/home.svg" alt="Home" width="20" height="20">
+          </button>
+          <button class="map-button expand" id="expand" aria-label="Expand analysis panel" title="Expand panel" hidden>
+            <img src="assets/collapse.svg" alt="" width="20" height="20">
+          </button>
+        </div>
+      </div>
+
+      <!-- Helper messages on map -->
+      <div class="map-message map-card" id="map-message" aria-live="polite" hidden></div>
+
+      <noscript><div class="map-card">Enable JavaScript to select an area and run analysis.</div></noscript>
+    </section>
+
+    <!-- Sidebar Panel: Crop Classification on Right -->
+    <aside class="sidebar" id="sidebar" aria-label="Crop analysis">
+      
+      <div class="heading">
+        <h2 class="sidebar-title">Crop Classification</h2>
+        <button class="icon-button collapse" id="collapse" aria-label="Collapse panel" title="Collapse sidebar">
+          <img src="assets/collapse.svg" alt="" width="20" height="20">
+        </button>
+      </div>
+
+      <!-- Control Fields: Selected Area & Season (Only 2018–2019 for Checkpoint) -->
+      <div class="fields">
+        <div class="field">
+          <label class="field-label">Selected area</label>
+          <button id="select-side" class="button neutral">Select area</button>
+        </div>
+        <div class="field">
+          <label class="field-label" for="season">Season</label>
+          <div class="select-wrapper">
+            <select id="season">
+              <option value="2018–2019" selected>2018–2019</option>
+            </select>
+            <span class="select-arrow">▼</span>
+          </div>
+        </div>
+      </div>
+      <!-- Primary Action: Analyze selected area -->
+      <button id="analyze" class="button primary" disabled>Analyze selected area</button>
+
+      <!-- Status: Entire area labeled (Visible only when done) -->
+      <div class="status" id="status" aria-live="polite" hidden></div>
+
+      <hr class="divider">
+
+      <!-- Dynamic Stages -->
+      <!-- 1. Empty State -->
+      <section id="empty-state" class="empty-state">
+        <div class="notice">
+          <strong>Start with an area</strong>
+          <p id="empty-description">Click "Select area" and drag a box on the map to analyze.</p>
+        </div>
+        <h3 class="how-title">How it works</h3>
+        <ol class="how-steps">
+          <li>Select an area and season</li>
+          <li>Review the satellite time series</li>
+          <li>Analyze and export your crop map</li>
+        </ol>
+        <p class="small muted" id="data-description">Available regions use prepared satellite imagery. TSViT runs when you press Analyze.</p>
+      </section>
+
+      <!-- 2. Ready State -->
+      <section id="ready-state" hidden>
+        <div class="notice">
+          <strong>Ready to analyze</strong>
+          <p id="ready-description"></p>
+        </div>
+        <p class="small muted">Each 10 m pixel receives one of the 19 PASTIS labels, including background.</p>
+      </section>
+
+      <!-- 3. Running State -->
+      <section id="running-state" hidden>
+        <h3 class="running-title">Analyzing your area</h3>
+        <p class="muted" id="progress-message">Preparing imagery</p>
+        <progress id="progress" value="0" max="100"></progress>
+        <div class="progress-label">
+          <span id="progress-label">Satellite imagery preparation</span>
+          <span id="progress-percent">0%</span>
+        </div>
+        <button class="button neutral btn-cancel" id="cancel-analysis">Cancel analysis</button>
+      </section>
+
+      <!-- 4. Error State -->
+      <section id="error-state" hidden>
+        <div class="notice error">
+          <strong id="error-title">Analysis unavailable</strong>
+          <p id="error-message"></p>
+        </div>
+        <button class="button neutral" id="retry">Try again</button>
+      </section>
+
+      <!-- 5. Results State (Visible ONLY after user presses Analyze and analysis completes!) -->
+      <section id="results" hidden>
+        <h3 class="section-title">Classification result</h3>
+        
+        <div class="crop-table-container">
+          <div class="crop-table" id="crop-table" aria-label="Crop areas"></div>
+        </div>
+
+        <div class="total-row">
+          <strong class="total-label">Selected area</strong>
+          <strong class="total-val" id="total-area">0.00 ha</strong>
+        </div>
+
+        <!-- Download Action Button -->
+        <button class="button primary btn-download" id="export">
+          <span class="download-arrow">↓</span>
+          <span>Download results</span>
+        </button>
+      </section>
+
+    </aside>
+
+  </main>
+
+  <!-- Modal Dialogs -->
+  <!-- 1. Confirm Reselect Dialog -->
+  <dialog id="confirm-dialog">
+    <div class="heading">
+      <h2>Reselect area?</h2>
+      <button class="icon-button dialog-close" aria-label="Close"><img src="assets/close.svg" width="22" height="22" alt=""></button>
+    </div>
+    <p class="muted">Your current result will leave the map. Download it first if you need a copy.</p>
+    <div class="dialog-actions">
+      <button class="button neutral dialog-close">Keep results</button>
+      <button class="button primary" id="confirm-reselect">Reselect area</button>
+    </div>
+  </dialog>
+
+  <!-- 2. Export / Download Dialog -->
+  <dialog id="export-dialog">
+    <div class="heading">
+      <h2>Download results</h2>
+      <button class="icon-button dialog-close" aria-label="Close"><img src="assets/close.svg" width="22" height="22" alt=""></button>
+    </div>
+    <p class="muted" id="export-description"></p><hr class="divider">
+    <label class="export-label" for="export-format">File format</label>
+    <select id="export-format">
+      <option value="csv">Area summary (.csv)</option>
+      <option value="geojson">GeoJSON (.geojson)</option>
+      <option value="png">Classification image (.png)</option>
+      <option value="tif">GeoTIFF (.tif)</option>
+    </select>
+    <strong>Include in export</strong>
+    <label class="checkbox-row"><input type="checkbox" checked disabled> Selected file format</label>
+    <label class="checkbox-row"><input type="checkbox" id="include-csv" checked> Area summary (.csv)</label>
+    <label class="checkbox-row"><input type="checkbox" id="include-png"> Classification preview (.png)</label>
+    <div class="notice"><p>Coordinates and class IDs included. Multiple files download together.</p></div>
+    <p id="download-error" class="error-text" hidden></p>
+    <div class="dialog-actions">
+      <button class="button neutral dialog-close">Cancel</button>
+      <button class="button primary" id="download">Download</button>
+    </div>
+  </dialog>
+
+  <!-- 3. Download Ready Dialog -->
+  <dialog id="download-dialog">
+    <div class="heading">
+      <h2>Download ready</h2>
+      <button class="icon-button dialog-close" aria-label="Close"><img src="assets/close.svg" width="22" height="22" alt=""></button>
+    </div>
+    <p class="muted">Your download has completed. It contains the predictions from this analysis.</p>
+    <button class="button primary dialog-close">Back to map</button>
+  </dialog>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast" role="status" hidden></div>
+
+</body>
+</html>
