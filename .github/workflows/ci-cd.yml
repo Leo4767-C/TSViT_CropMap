@@ -1,0 +1,154 @@
+###############################################################################
+# GitHub Actions CI/CD Pipeline — TSViT Crop Classification
+#
+# Triggers:
+#   - Push to `main` branch
+#   - Pull Requests to `main`
+#
+# Jobs:
+#   1. test      — Lint + Unit tests (model import, forward pass, checkpoint)
+#   2. build     — Build Docker image & push to Docker Hub
+#   3. deploy    — (Optional) Deploy to server via SSH
+###############################################################################
+
+name: CI/CD — TSViT Crop Map
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  DOCKER_IMAGE: chuong47/tsvit-cropmap
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  # ─────────────────────────────────────────────────────
+  # Job 1: Test — Verify model loads and runs correctly
+  # ─────────────────────────────────────────────────────
+  test:
+    name: 🧪 Test Model & Code
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true            # Pull Git LFS files (model weights)
+
+      - name: 🐍 Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt
+          pip install flake8 einops
+
+      - name: 🔍 Lint with flake8 (critical errors only)
+        run: |
+          flake8 models/ --count --select=E9,F63,F7,F82 --show-source --statistics
+
+      - name: ✅ Test model imports
+        run: |
+          python -c "
+          from models.TSViT.module import Attention, PreNorm, FeedForward
+          from models.TSViT.TSViTdense import TSViT
+          from models.TSViT.TSViTcls import TSViTcls
+          from models import get_model
+          print('All model imports successful')
+          "
+
+      - name: ✅ Test TSViT forward pass
+        run: |
+          python -c "
+          import torch, yaml
+          from models.TSViT.TSViTdense import TSViT
+
+          with open('Checkpoint/checkpoint/config_file.yaml') as f:
+              config = yaml.safe_load(f)
+
+          model = TSViT(config['MODEL'])
+          model.eval()
+
+          x = torch.randn(1, 12, 24, 24, 11)
+          x[:, :, :, :, -1] = torch.linspace(0.1, 0.9, 12).view(1, 12, 1, 1)
+
+          with torch.no_grad():
+              out = model(x)
+
+          assert out.shape == (1, 19, 24, 24), f'Unexpected shape: {out.shape}'
+          print(f'Forward pass OK — output shape: {out.shape}')
+          "
+
+      - name: ✅ Test checkpoint loading
+        run: |
+          python -c "
+          import torch, yaml
+          from models.TSViT.TSViTdense import TSViT
+
+          with open('Checkpoint/checkpoint/config_file.yaml') as f:
+              config = yaml.safe_load(f)
+
+          model = TSViT(config['MODEL'])
+          ckpt = torch.load('Checkpoint/checkpoint/best.pth', map_location='cpu', weights_only=False)
+          model.load_state_dict(ckpt, strict=True)
+          print('Checkpoint loaded with strict=True — 100% match')
+          "
+
+  # ─────────────────────────────────────────────────────
+  # Job 2: Build Docker image & push to Docker Hub
+  # ─────────────────────────────────────────────────────
+  build:
+    name: 🐳 Build & Push Docker Image
+    runs-on: ubuntu-latest
+    needs: test                # Only build if tests pass
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: 🔧 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔑 Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: 🏷️ Generate image tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKER_IMAGE }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=
+            type=raw,value={{date 'YYYYMMDD'}}
+
+      - name: 🐳 Build & Push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: 📋 Image summary
+        run: |
+          echo "### 🐳 Docker Image Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Image | \`${{ env.DOCKER_IMAGE }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tags | \`${{ steps.meta.outputs.tags }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Registry | Docker Hub |" >> $GITHUB_STEP_SUMMARY

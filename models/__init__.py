@@ -1,20 +1,20 @@
-from models.TSViT.TSViTdense import TSViT, TSViT_DINOv3
-from models.TSViT.TSViTcls import TSViTcls, TSViTcls_DINOv3
+from models.TSViT.TSViTdense import TSViT
+from models.TSViT.TSViTcls import TSViTcls
 
 
 def get_model(config, device):
     model_config = config['MODEL']
     arch = model_config['architecture']
 
-    if arch in ["TSViTcls", "TSViTcls_DINOv3", "TSViTcls-DINOv3"]:
+    if arch in ["TSViTcls"]:
         model_config['device'] = device
         return TSViTcls(model_config).to(device)
 
-    elif arch in ["TSViT", "TSViT_DINOv3", "TSViT-DINOv3"]:
+    elif arch in ["TSViT"]:
         return TSViT(model_config).to(device)
 
     else:
         raise NameError(
             f"Model architecture '{arch}' not recognized. "
-            f"Available architectures: 'TSViT', 'TSViT_DINOv3', 'TSViTcls', 'TSViTcls_DINOv3'"
+            f"Available architectures: 'TSViT', 'TSViTcls'"
         )

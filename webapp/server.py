@@ -112,7 +112,6 @@ def load_tsvit_model():
             config = yaml.safe_load(f)
 
         model_config = config['MODEL']
-        model_config['spatial_backbone'] = 'standard'
         model = TSViT(model_config)
         
         if os.path.exists(CHECKPOINT_PATH):

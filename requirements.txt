@@ -3,4 +3,4 @@ torch
 numpy
 Pillow
 PyYAML
-spaces
+einops

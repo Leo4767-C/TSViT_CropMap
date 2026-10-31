@@ -1,12 +1,9 @@
 import torch
-from torch import nn, einsum
+from torch import nn
 import torch.nn.functional as F
-from einops import rearrange, repeat
+from einops import repeat
 from einops.layers.torch import Rearrange
 from models.TSViT.module import Attention, PreNorm, FeedForward
-from models.TSViT.dinov3 import DINOv3SpatialEncoder
-from utils.config_files_utils import get_params_values
-import numpy as np
 
 
 class Transformer(nn.Module):
@@ -35,7 +32,7 @@ class TSViTcls(nn.Module):
         super().__init__()
         self.image_size = model_config['img_res']
         self.patch_size = model_config['patch_size']
-        self.num_patches_1d = self.image_size//self.patch_size
+        self.num_patches_1d = self.image_size // self.patch_size
         self.num_classes = model_config['num_classes']
         self.num_frames = model_config['max_seq_len']
         self.dim = model_config['dim']
@@ -47,7 +44,6 @@ class TSViTcls(nn.Module):
             self.spatial_depth = model_config['spatial_depth']
         else:
             self.spatial_depth = model_config['depth']
-        # self.depth = model_config['depth']
         self.heads = model_config['heads']
         self.dim_head = model_config['dim_head']
         self.dropout = model_config['dropout']
@@ -64,18 +60,9 @@ class TSViTcls(nn.Module):
         self.temporal_token = nn.Parameter(torch.randn(1, self.num_classes, self.dim))
         self.temporal_transformer = Transformer(self.dim, self.temporal_depth, self.heads, self.dim_head,
                                                 self.dim * self.scale_dim, self.dropout)
-        self.space_token = nn.Parameter(torch.randn(1, self.num_classes, self.dim))
         self.space_pos_embedding = nn.Parameter(torch.randn(1, num_patches, self.dim))
-        print('space pos embedding: ', self.space_pos_embedding.shape)
         self.space_token = nn.Parameter(torch.randn(1, 1, self.dim))
-        print('space token: ', self.space_token.shape)
-        self.spatial_backbone = get_params_values(model_config, 'spatial_backbone', 'dinov3')
-        if self.spatial_backbone in ['dinov3', 'dino-v3', 'DINOv3']:
-            self.space_transformer = DINOv3SpatialEncoder(
-                dim=self.dim, depth=self.spatial_depth, heads=self.heads, dim_head=self.dim_head,
-                mlp_dim=self.dim * self.scale_dim, dropout=self.dropout, model_config=model_config)
-        else:
-            self.space_transformer = Transformer(self.dim, self.spatial_depth, self.heads, self.dim_head, self.dim * self.scale_dim, self.dropout)
+        self.space_transformer = Transformer(self.dim, self.spatial_depth, self.heads, self.dim_head, self.dim * self.scale_dim, self.dropout)
         self.dropout = nn.Dropout(self.emb_dropout)
         self.mlp_head = nn.Sequential(
             nn.LayerNorm(self.dim),
@@ -101,41 +88,9 @@ class TSViTcls(nn.Module):
         x = x.reshape(B, self.num_patches_1d**2, self.num_classes, self.dim).permute(0, 2, 1, 3).reshape(B*self.num_classes, self.num_patches_1d**2, self.dim)
         cls_space_tokens = repeat(self.space_token, '() N d -> b N d', b=B * self.num_classes)
         x = torch.cat((cls_space_tokens, x), dim=1)
-        if self.spatial_backbone in ['dinov3', 'dino-v3', 'DINOv3']:
-            x = self.space_transformer(x, h=self.num_patches_1d, w=self.num_patches_1d, has_cls_token=True)[:, 0]
-        else:
-            x += torch.cat([torch.zeros(1, 1, self.dim, device=x.device), self.space_pos_embedding], dim=1)
-            x = self.dropout(x)
-            x = self.space_transformer(x)[:, 0]
+        x += torch.cat([torch.zeros(1, 1, self.dim, device=x.device), self.space_pos_embedding], dim=1)
+        x = self.dropout(x)
+        x = self.space_transformer(x)[:, 0]
         x = self.mlp_head(x.reshape(-1, self.dim))
         x = x.reshape(B, self.num_classes)
         return x
-
-
-class TSViTcls_DINOv3(TSViTcls):
-    """
-    Temporal-Spatial ViT Classification model with DINO-v3 Spatial Encoder/Backbone.
-    """
-    def __init__(self, model_config):
-        model_config = dict(model_config)
-        model_config['spatial_backbone'] = 'dinov3'
-        super().__init__(model_config)
-
-
-
-if __name__ == "__main__":
-    res = 24
-    model_config = {'img_res': res, 'patch_size': 3, 'patch_size_time': 1, 'patch_time': 4, 'num_classes': 20,
-                    'max_seq_len': 16, 'dim': 128, 'temporal_depth': 10, 'spatial_depth': 4, 'depth': 4,
-                    'heads': 3, 'pool': 'cls', 'num_channels': 14, 'dim_head': 64, 'dropout': 0., 'emb_dropout': 0.,
-                    'scale_dim': 4}
-    train_config = {'dataset': "psetae_repl_2018_100_3", 'label_map': "labels_20k2k", 'max_seq_len': 16, 'batch_size': 5,
-                    'extra_data': [], 'num_workers': 4}
-
-    model = TSViTcls(model_config).cuda()
-    parameters = filter(lambda p: p.requires_grad, model.parameters())
-    parameters = sum([np.prod(p.size()) for p in parameters]) / 1_000_000
-    print('Trainable Parameters: %.3fM' % parameters)
-    img = torch.rand((2, 16, 14, res, res)).cuda()
-    out = model(img)
-    print("Shape of out :", out.shape)  # [B, num_classes]

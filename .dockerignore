@@ -1,0 +1,52 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large training data (not needed for inference)
+data/
+
+# TensorBoard events (not needed in production)
+Checkpoint/checkpoint/Accuracy_*
+Checkpoint/checkpoint/F1_*
+Checkpoint/checkpoint/IOU_*
+Checkpoint/checkpoint/Loss_*
+Checkpoint/checkpoint/Precision_*
+Checkpoint/checkpoint/Recall_*
+Checkpoint/checkpoint/events.*
+
+# Generated overlay images
+webapp/assets/overlay_*.png
+webapp/assets/test_*.png
+webapp/assets/match_*.png
+
+# Documentation
+*.md
+LICENSE.txt
+EC2_DEPLOY_GUIDE.md
+
+# Deployment scripts (not needed inside container)
+deploy_ec2.sh
+deepsatmodels_env.yml
+
+# Gemini / Agents
+.agents/
+.gemini/

@@ -2,10 +2,19 @@ version: '3.8'
 
 services:
   tsvit-cropmap:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: chuong47/tsvit-cropmap:latest
     container_name: tsvit-cropmap
     restart: always
     ports:
       - "80:80"
     environment:
       - PYTHONUNBUFFERED=1
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:80/')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
