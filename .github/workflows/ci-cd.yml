@@ -20,7 +20,7 @@ on:
     branches: [main]
 
 env:
-  DOCKER_IMAGE: chuong47/tsvit-cropmap
+  DOCKER_IMAGE: leo475/tsvit-cropmap
   PYTHON_VERSION: "3.12"
 
 jobs:

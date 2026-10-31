@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: chuong47/tsvit-cropmap:latest
+    image: leo475/tsvit-cropmap:latest
     container_name: tsvit-cropmap
     restart: always
     ports:
